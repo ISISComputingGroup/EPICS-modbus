@@ -171,6 +171,7 @@ typedef struct modbusStr
     int enableHistogram;
     int histogramMsPerBin;
     int readbackOffset;  /* Readback offset for Wago devices */
+    asynStatus previousQueueRequestStatus;
 } modbusStr_t;
 
 
@@ -1721,17 +1722,28 @@ static int doModbusIO(PLC_ID pPlc, int slave, int function, int start,
                                          MODBUS_READ_TIMEOUT,
                                          &nwrite, &nread, &eomReason);
     epicsTimeGetCurrent(&endTime);
-                                         
-    if (status != asynSuccess) {
-        asynPrint(pPlc->pasynUserTrace, ASYN_TRACE_ERROR,
+
+    /* only print first of repeated error messages for a port */
+    if (pPlc->previousQueueRequestStatus != status) {
+        pPlc->previousQueueRequestStatus = status;
+        if (status == asynSuccess) {
+           asynPrint(pPlc->pasynUserTrace, ASYN_TRACE_ERROR,
+                 "%s::doModbusIO port %s status returned to normal.", driver, pPlc->portName);
+        } else {
+           asynPrint(pPlc->pasynUserTrace, ASYN_TRACE_ERROR,
                  "%s::doModbusIO port %s error calling writeRead,"
                  " error=%s, nwrite=%d/%d, nread=%d\n", 
-                 driver, pPlc->portName, 
+                 driver, pPlc->portName,
                  pPlc->pasynUserOctet->errorMessage, (int)nwrite, requestSize, (int)nread);
+        }
+    }
+
+    if (status != asynSuccess)
+    {
         pPlc->IOErrors++;
         goto done;
     }
-               
+
     dT = epicsTimeDiffInSeconds(&endTime, &startTime);
     msec = (int)(dT*1000. + 0.5);
     pPlc->lastIOMsec = msec;
