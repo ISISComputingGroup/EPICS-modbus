@@ -326,6 +326,7 @@ int drvModbusAsynConfigure(char *portName,
     pPlc->pollDelay = pollMsec/1000.;
     if (pPlc->pollDelay < MIN_POLL_DELAY) pPlc->pollDelay = MIN_POLL_DELAY;
     pPlc->histogramMsPerBin = 1;
+    pPlc->previousQueueRequestStatus = asynSuccess;
 
     /* Set readback offset for Wago devices for which the register readback address 
      * is different from the register write address */
@@ -1732,7 +1733,7 @@ static int doModbusIO(PLC_ID pPlc, int slave, int function, int start,
         } else {
            asynPrint(pPlc->pasynUserTrace, ASYN_TRACE_ERROR,
                  "%s::doModbusIO port %s error calling writeRead,"
-                 " error=%s, nwrite=%d/%d, nread=%d\n", 
+                 " error=%s, nwrite=%d/%d, nread=%d\n",
                  driver, pPlc->portName,
                  pPlc->pasynUserOctet->errorMessage, (int)nwrite, requestSize, (int)nread);
         }
