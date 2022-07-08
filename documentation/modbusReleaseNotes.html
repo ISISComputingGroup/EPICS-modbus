@@ -12,6 +12,145 @@
   </div>
   <div style="text-align: center">
     <h2>
+      Release 2-10-1</h2>
+    <h2>
+      September 15, 2017</h2>
+  </div>
+  <ul>
+    <li>Previously the Modbus/TCP transaction ID was set to 1 on writes and ignored on
+      reads. Now the Modbus transaction ID is incremented by 1 on each message sent by
+      the driver. On the reply the driver waits until a message with the correct transaction
+      ID is received, ignoring messages with any other transaction ID. This is more robust,
+      especially for Modbus/UDP links. Thanks to Eric Norum for this.</li>
+  </ul>
+  <div style="text-align: center">
+    <h2>
+      Release 2-10</h2>
+    <h2>
+      September 15, 2017</h2>
+  </div>
+  <ul>
+    <li>Added an epicsAtExit handler which stops the poller task. This eliminates error
+      messages from the poller task when the IOC exits.</li>
+    <li>Greatly reduced the number of error messages printed when there are communication
+      errors or timeouts with the Modbus device. Previously error messages were printed
+      for each asyn port on each poller loop. Now, there is a single message per port
+      when an error condition is detected, and a single message when the error condition
+      ends. For example this is the output from a Koyo PLC with 3 drvModbusAsyn input
+      ports that are polling at 10 Hz. The drvAsynIPPort has the asynOption "disconnectOnReadTimeout"
+      set to "Y" set so that it reconnects quickly when the network is reconnected. The
+      Ethernet cable was unplugged for about 8 seconds and then plugged back in.
+      <pre>2017/09/12 13:14:25.764 drvModbusAsyn::doModbusIO port K1_Xn_Bit error calling writeRead, error=164.54.160.197:502 read error: S_errno_EWOULDBLOCK, nwrite=6/6, nread=0
+2017/09/12 13:14:25.781 drvModbusAsyn::doModbusIO port K1_Yn_In_Bit error calling writeRead, error=asynManager::queueLockPort queueRequest timed out, nwrite=0/6, nread=0
+2017/09/12 13:14:25.814 drvModbusAsyn::doModbusIO port K1_Cn_In_Bit error calling writeRead, error=asynManager::queueLockPort queueRequest timed out, nwrite=0/6, nread=0
+2017/09/12 13:14:33.564 drvModbusAsyn::doModbusIO port K1_Xn_Bit writeRead status back to normal nwrite=6/6, nread=6
+2017/09/12 13:14:33.581 drvModbusAsyn::doModbusIO port K1_Yn_In_Bit writeRead status back to normal nwrite=6/6, nread=6
+2017/09/12 13:14:33.614 drvModbusAsyn::doModbusIO port K1_Cn_In_Bit writeRead status back to normal nwrite=6/6, nread=34
+</pre>
+      The first error message indicates that the K1_Xn_Bit driver got a timeout when reading
+      the device. That timeout causes drvAsynIPPort driver to disconnect the port because
+      of the asynOption described above. The next 2 errors are from the other two ports
+      which get queueRequest timeouts because the port is now disconnected. When the network
+      cable is reconnected each of the ports prints a "status back to normal" message.</li>
+    <li>The example IOC startup scripts now call asynSetOption("disconnectOnReadTimeout",
+      "Y"). for TCP ports. This ensures much faster reconnection when the Modbus device
+      comes back online if it disconnects. Note that for this to work asyn R4-32 or later
+      is needed, because of a needed fix to asynManager::queueLockPort(), which is used
+      by the asynXXXSyncIO functions.</li>
+  </ul>
+  <div style="text-align: center">
+    <h2>
+      Release 2-9</h2>
+    <h2>
+      August 23, 2016</h2>
+  </div>
+  <ul>
+    <li>Added support for specifying absolute Modbus addresses in the asyn "addr" field.
+      Previously each driver was limited to addressing at most 125 registers (read operations)
+      or 123 registers (write operations), and the asyn "addr" field specified an offset
+      relative to the modbusStartAddress passed as the fifth argument to drvAsynModbusConfigure().
+      Now if the modbusStartAddress=-1 then the driver will use absolute addressing, and
+      the asyn "addr" specifies the absolute Modbus address in the range 0 to 65535. In
+      this case the modbusLength argument to drvAsynModbusConfigure() is the maximum length
+      required for any single Modbus transaction by that driver. This would be 1 if all
+      Modbus reads and writes are for 16-bit registers, but it would be 4 if 64-bit floats
+      (4 16-bit registers) are being used, and 100 (for example) if an Int32 waveform
+      record with NELM=100 and a 16-bit Modbus data type is being read or written.</li>
+    <li>Added support for strings using the asynOctet interface. Some vendors use Modbus
+      for string data. The Modbus standard does not specify how strings should be stored,
+      and different vendors do it differently. The driver supports 4 new Modbus data types,
+      using the following drvInfo strings:
+      <ul>
+        <li>STRING_HIGH One character is stored in the high byte of each register.</li>
+        <li>STRING_LOW One character is stored in the low byte of each register.</li>
+        <li>STRING_HIGH_LOW Two characters are stored in each register, the first in the high
+          byte and the second in the low byte.</li>
+        <li>STRING_LOW_HIGH Two characters are stored in each register, the first in the low
+          byte and the second in the high byte.</li>
+      </ul>
+      The standard asynOctet device support is used. This supports stringout, stringin,
+      and waveform records. Waveform records can be used for either input or output. The
+      stringin and stringout records are limited to 40 characters strings, while waveform
+      records are limited only by the 125/123 register limit of Modbus for read/write
+      operatations i.e. up to 250 characters. </li>
+    <li>Added error checking to make sure the length of the reply from the Modbus server
+      is the expected value. Previously garbled communications could cause a crash because
+      of array bounds violation.</li>
+  </ul>
+  <div style="text-align: center">
+    <h2>
+      Release 2-8</h2>
+    <h2>
+      February 11, 2016</h2>
+  </div>
+  <ul>
+    <li>Improved the logic in the poller thread.
+      <ul>
+        <li>Previously there was a call to epicsThreadSleep at the end of the poller loop.
+          This meant that the poller always ran at least once, which might not be desirable.
+          It also meant that one could only temporarily disable the poller by calling pasynManager-&gt;lockPort(),
+          or to make it run infrequently by setting POLL_DELAY to a long sleep time. In R2-5
+          the MODBUS_READ command was added. However, this just did a read operation without
+          triggering the poller thread, so records with I/O Intr scan would not process. It
+          also required disabling the poller thread with pasynManager-&gt;LockPort.</li>
+        <li>The poller thread has been changed so that it calls epicsEventWait or epicsEventWaitWithTimeout
+          at the beginning of the poller loop. If the POLL_DELAY is &gt;0 then it calls epicsEventWaitWithTimeout,
+          using the POLL_DELAY as the timeout. If POLL_DELAY is &le;0 then it calls epicsEventWait,
+          with no timeout. This allows the poller to be suspended indefinitely and only run
+          when the epicsEvent is signaled. It also means if POLL_DELAY &le;0 then the poller
+          does not run at all until the epicsEvent is signaled. The MODBUS_READ command now
+          signals the epicsEvent to trigger the poller, rather than directly doing a read
+          operation.</li>
+        <li>Added a new template file, poll_trigger.template which loads a record with the
+          MODBUS_READ drvInfo string to trigger the poller.</li>
+      </ul>
+    </li>
+    <li>Fixed problems when using waveform records with the asynInt32Array interface.
+      <ul>
+        <li>If the Modbus data type was not UINT16 or INT16 then the data were not read into
+          the waveform record correctly. This bug has been fixed, and new files iocBoot/iocTest/array_test.cmd
+          and array_test.substitions were added to test it using the Modbus Slave Simulator.
+          New adl files, modbusTestArray.adl and array_test.adl were added for these tests.
+          modbusTestArray.adl also contains controls for POLL_DELAY and POLL_TRIGGER to verify
+          the improvements to the poller thread above.</li>
+        <li>Previously the first element in the waveform record was always the first register
+          in that modbus driver, i.e. it did not allow specifying a register offset using
+          the asyn ADDR address. This was improved so now one can specify an offset using
+          the OFFSET macro parameter, as with the non-array records in modbus.</li>
+      </ul>
+    </li>
+  </ul>
+  <div style="text-align: center">
+    <h2>
+      Release 2-7-1</h2>
+    <h2>
+      May 6, 2015</h2>
+  </div>
+  <ul>
+    <li>Minor changes to allow building dynamically on Cygwin.</li>
+  </ul>
+  <div style="text-align: center">
+    <h2>
       Release 2-7</h2>
     <h2>
       August 19, 2014</h2>

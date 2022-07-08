@@ -10,6 +10,7 @@ modbus_registerRecordDeviceDriver(pdbbase)
 #                       int noAutoConnect,
 #                       int noProcessEos);
 drvAsynIPPortConfigure("sim1","164.54.160.31:502",0,0,1)
+asynSetOption("sim1",0, "disconnectOnReadTimeout", "Y")
 #modbusInterposeConfig(const char *portName,
 #                      modbusLinkType linkType,
 #                      int timeoutMsec, 
@@ -63,13 +64,6 @@ drvModbusAsynConfigure("A0_Out_Word", "sim1", 0, 16, 100, 60, 0, 1, "Simulator")
 # default data type unsigned integer.
 # drvModbusAsynConfigure("portName", "tcpPortName", slaveAddress, modbusFunction, modbusStartAddress, modbusLength, dataType, pollMsec, "plcType")
 drvModbusAsynConfigure("A0_In_Word", "sim1", 0, 3, 100, 60, 0, 100, "Simulator")
-
-# Access 60 words as outputs.  
-# Either function code=6 (single register) or 16 (multiple registers) can be used, but 16
-# is better because it is "atomic" when writing values longer than 16-bits.
-# Default data type unsigned integer.
-# drvModbusAsynConfigure("portName", "tcpPortName", slaveAddress, modbusFunction, modbusStartAddress, modbusLength, dataType, pollMsec, "plcType")
-drvModbusAsynConfigure("A0_Out_Word", "sim1", 0, 16, 100, 60, 0, 1, "Simulator")
 
 # Enable ASYN_TRACEIO_HEX on octet server
 asynSetTraceIOMask("sim1",0,4)
