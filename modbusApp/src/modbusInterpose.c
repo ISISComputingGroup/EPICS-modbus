@@ -13,6 +13,7 @@
 
 #include <stddef.h>
 #include <string.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -87,6 +88,7 @@ typedef struct modbusPvt {
     void           *octetPvt;
     modbusLinkType linkType;
     asynUser       *pasynUser;
+    int           skipTransactionId;
     int            transactionId;
     char           buffer[MAX_MODBUS_FRAME_SIZE];
 } modbusPvt;
@@ -118,7 +120,7 @@ static asynOctet octet = {
 
 epicsShareFunc int modbusInterposeConfig(const char *portName,
                                          modbusLinkType linkType, 
-                                         int timeoutMsec, int writeDelayMsec)
+                                         int timeoutMsec, int writeDelayMsec, const int skipTransactionId)
 {
     modbusPvt     *pPvt;
     asynInterface *pasynInterface;
@@ -133,6 +135,7 @@ epicsShareFunc int modbusInterposeConfig(const char *portName,
     if (pPvt->timeout == 0.0) pPvt->timeout = DEFAULT_TIMEOUT;
     pPvt->modbusInterface.interfaceType = asynOctetType;
     pPvt->modbusInterface.pinterface = &octet;
+    pPvt->skipTransactionId = skipTransactionId;
     pPvt->modbusInterface.drvPvt = pPvt;
     pasynUser = pasynManager->createAsynUser(0,0);
     pPvt->pasynUser = pasynUser;
@@ -343,7 +346,7 @@ static asynStatus readIt(void *ppvt, asynUser *pasynUser,
                 if (status != asynSuccess) return status;
                 if (nbytesActual >= 2) {
                     int id = ((pPvt->buffer[0] & 0xFF)<<8)|(pPvt->buffer[1]&0xFF);
-                    if (id == pPvt->transactionId) break;
+                    if (pPvt->skipTransactionId != 0 || id == pPvt->transactionId) break;
                 }
             }
             /* Copy bytes beyond mbapHeader to output buffer */
@@ -474,25 +477,28 @@ static asynStatus getOutputEos(void *ppvt, asynUser *pasynUser,
                                      eos, eossize, eoslen);
 }
 
-
+
 /* register modbusInterposeConfig*/
 static const iocshArg modbusInterposeConfigArg0 = { "portName", iocshArgString };
 static const iocshArg modbusInterposeConfigArg1 = { "link type", iocshArgInt };
 static const iocshArg modbusInterposeConfigArg2 = { "timeout (msec)", iocshArgInt };
 static const iocshArg modbusInterposeConfigArg3 = { "write delay (msec)", iocshArgInt };
+static const iocshArg modbusInterposeConfigArg4 = { "skip transaction id check", iocshArgInt };
 static const iocshArg *modbusInterposeConfigArgs[] = {
                                                     &modbusInterposeConfigArg0,
                                                     &modbusInterposeConfigArg1,
                                                     &modbusInterposeConfigArg2,
-                                                    &modbusInterposeConfigArg3};
+                                                    &modbusInterposeConfigArg3,
+                                                    &modbusInterposeConfigArg4};
 static const iocshFuncDef modbusInterposeConfigFuncDef =
-    {"modbusInterposeConfig", 4, modbusInterposeConfigArgs};
+    {"modbusInterposeConfig", 5, modbusInterposeConfigArgs};
 static void modbusInterposeConfigCallFunc(const iocshArgBuf *args)
 {
     modbusInterposeConfig(args[0].sval,
                           args[1].ival,
                           args[2].ival,
-                          args[3].ival);
+                          args[3].ival,
+                          args[4].ival);
 }
 
 static void modbusInterposeRegister(void)
