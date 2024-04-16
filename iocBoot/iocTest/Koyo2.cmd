@@ -1,7 +1,7 @@
 # Koyo2.cmd
 
-dbLoadDatabase("../../dbd/modbus.dbd")
-modbus_registerRecordDeviceDriver(pdbbase)
+dbLoadDatabase("../../dbd/modbusApp.dbd")
+modbusApp_registerRecordDeviceDriver(pdbbase)
 
 # Use the following commands for TCP/IP
 #drvAsynIPPortConfigure(const char *portName,
@@ -9,7 +9,7 @@ modbus_registerRecordDeviceDriver(pdbbase)
 #                       unsigned int priority,
 #                       int noAutoConnect,
 #                       int noProcessEos);
-drvAsynIPPortConfigure("Koyo2","164.54.160.158:502",0,0,1)
+drvAsynIPPortConfigure("Koyo2","164.54.160.158:502",0,0,0)
 asynSetOption("Koyo2",0, "disconnectOnReadTimeout", "Y")
 #modbusInterposeConfig(const char *portName,
 #                      modbusLinkType linkType,

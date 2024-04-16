@@ -1,7 +1,7 @@
 # simulator.cmd
 
-dbLoadDatabase("../../dbd/modbus.dbd")
-modbus_registerRecordDeviceDriver(pdbbase)
+dbLoadDatabase("../../dbd/modbusApp.dbd")
+modbusApp_registerRecordDeviceDriver(pdbbase)
 
 # Use the following commands for TCP/IP
 #drvAsynIPPortConfigure(const char *portName,
@@ -9,7 +9,7 @@ modbus_registerRecordDeviceDriver(pdbbase)
 #                       unsigned int priority,
 #                       int noAutoConnect,
 #                       int noProcessEos);
-drvAsynIPPortConfigure("sim1","164.54.160.31:502",0,0,1)
+drvAsynIPPortConfigure("sim1","164.54.160.31:502",0,0,0)
 asynSetOption("sim1",0, "disconnectOnReadTimeout", "Y")
 #modbusInterposeConfig(const char *portName,
 #                      modbusLinkType linkType,
