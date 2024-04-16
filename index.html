@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>modbus &mdash; EPICS support for Modbus</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/my_theme.css?v=254ed751" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Acknowledgments" href="acknowledgments.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            modbus
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgments.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview of Modbus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="driver_architecture.html">Driver architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="creating_driver.html">Creating a <strong>modbus</strong> port driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="device_support.html">EPICS device support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_applications.html">Example Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="medm_screens.html">medm screens</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debug tracing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">modbus</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">modbus</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="modbus">
+<h1>modbus<a class="headerlink" href="#modbus" title="Link to this heading"></a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Mark Rivers, University of Chicago</p>
+</dd>
+</dl>
+<p>This is an EPICS module for communicating with Modbus devices using asyn device support.</p>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgments.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview of Modbus</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#modbus-communication-links">Modbus communication links</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#modbus-data-types">Modbus data types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#modbus-communications">Modbus communications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#modbus-function-codes">Modbus function codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#modbus-addresses">Modbus addresses</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="overview.html#discrete-inputs-and-coils">Discrete inputs and coils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="overview.html#input-registers-and-holding-registers-v-memory">Input registers and holding registers (V memory)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#modbus-data-length-limitations">Modbus data length limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#more-information-on-modbus">More information on Modbus</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="driver_architecture.html">Driver architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="driver_architecture.html#modbus-read-functions">Modbus read functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="driver_architecture.html#modbus-write-functions">Modbus write functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="driver_architecture.html#modbus-write-read-functions">Modbus write/read functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="driver_architecture.html#platform-independence">Platform independence</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="creating_driver.html">Creating a <strong>modbus</strong> port driver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="creating_driver.html#tcp-ip">TCP/IP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_driver.html#serial-rtu">Serial RTU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_driver.html#serial-ascii">Serial ASCII</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_driver.html#modbusinterposeconfig">modbusInterposeConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_driver.html#drvmodbusasynconfigure">drvModbusAsynConfigure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_driver.html#modbus-register-data-types">Modbus register data types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_driver.html#note-for-wago-devices">Note for Wago devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_driver.html#number-of-drvasynipport-drivers-for-tcp">Number of drvAsynIPPort drivers for TCP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_driver.html#number-formats">Number formats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="device_support.html">EPICS device support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="device_support.html#asynuint32digital">asynUInt32Digital</a></li>
+<li class="toctree-l2"><a class="reference internal" href="device_support.html#asynint32">asynInt32</a></li>
+<li class="toctree-l2"><a class="reference internal" href="device_support.html#asynint64">asynInt64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="device_support.html#asynfloat64">asynFloat64</a></li>
+<li class="toctree-l2"><a class="reference internal" href="device_support.html#asynint32array">asynInt32Array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="device_support.html#asynoctet">asynOctet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="device_support.html#template-files">Template files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="example_applications.html">Example Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="medm_screens.html">medm screens</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="medm_screens.html#modbusdatatypes-adl">modbusDataTypes.adl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="medm_screens.html#koyo1-adl">Koyo1.adl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="medm_screens.html#koyo-8inputs-adl">Koyo_8inputs.adl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="medm_screens.html#koyo-8outputs-adl">Koyo_8outputs.adl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="medm_screens.html#modbusarray-adl">modbusArray.adl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="medm_screens.html#modbusstatistics-adl">modbusStatistics.adl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="medm_screens.html#koyo2-adl">Koyo2.adl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="medm_screens.html#koyo-4adc-adl">Koyo_4ADC.adl</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debug tracing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#asynrecord-adl">asynRecord.adl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#asynregister-adl">asynRegister.adl</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="acknowledgments.html" class="btn btn-neutral float-right" title="Acknowledgments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mark Rivers.
+      <span class="lastupdated">Last updated on 2024-April-16.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
