@@ -10,33 +10,39 @@ include $(TOP)/configure/CONFIG
 # Build an IOC support library
 
 # <name>.dbd will be created from <name>Include.dbd
-DBD += modbus.dbd
+DBD += modbusApp.dbd
 DBD += modbusSupport.dbd
 
 INC += drvModbusAsyn.h
+INC += modbusInterpose.h
+INC += modbus.h
 
 LIBRARY_IOC = modbus
 
-LIB_SRCS += drvModbusAsyn.c
+USR_CFLAGS += -DUSE_TYPED_RSET
+USR_CPPFLAGS += -DUSE_TYPED_RSET
+
+LIB_SRCS += drvModbusAsyn.cpp
 LIB_SRCS += modbusInterpose.c
 LIB_SRCS += testModbusSyncIO.cpp
 LIB_LIBS += asyn 
 LIB_LIBS += $(EPICS_BASE_IOC_LIBS)
 LIB_SYS_LIBS_WIN32 += ws2_32
 
-#===========================
-
-#Note that the command line that builds the
-#library $(LIBNAME) may be HUGE (>3kB)
-
 #=============================
 # build an ioc application
 
-PROD_IOC = modbusApp
+PROD_IOC += modbusApp
+modbusApp_DBD += base.dbd
+modbusApp_DBD += asyn.dbd drvAsynIPPort.dbd drvAsynSerialPort.dbd
+modbusApp_DBD += modbusSupport.dbd
 
 # <name>_registerRecordDeviceDriver.cpp will be created from <name>.dbd
-PROD_SRCS_DEFAULT += modbus_registerRecordDeviceDriver.cpp modbusMain.cpp
-PROD_SRCS_vxWorks += modbus_registerRecordDeviceDriver.cpp
+modbusApp_SRCS_DEFAULT += modbusApp_registerRecordDeviceDriver.cpp modbusMain.cpp
+modbusApp_SRCS_vxWorks += modbusApp_registerRecordDeviceDriver.cpp
+
+PROD_IOC += testClient
+testClient_SRCS += testClient.cpp
 
 PROD_LIBS += modbus
 PROD_LIBS += asyn

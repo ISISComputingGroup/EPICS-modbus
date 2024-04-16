@@ -6,9 +6,11 @@ bin/
 /db/
 dbd/
 html/
+_docs/
 include/
 lib/
 templates/
+__pycache__/
 cdCommands
 envPaths
 dllPath.bat

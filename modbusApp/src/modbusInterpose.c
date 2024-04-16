@@ -27,9 +27,10 @@
 #include <epicsThread.h>
 #include "asynDriver.h"
 #include "asynOctet.h"
+
+#include <epicsExport.h>
 #include "modbusInterpose.h"
 #include "modbus.h"
-#include <epicsExport.h>
 
 static char *driver="modbusInterpose";
 
@@ -234,7 +235,7 @@ static asynStatus writeIt(void *ppvt, asynUser *pasynUser,
     size_t     nbytesActual = 0;
     size_t     nWrite;
     modbusMBAPHeader mbapHeader;
-    unsigned short cmdLength = numchars;
+    unsigned short cmdLength = (unsigned short)numchars;
     unsigned short modbusEncoding=0;
     int mbapSize = sizeof(modbusMBAPHeader);
     unsigned char CRC_Hi;
@@ -274,7 +275,7 @@ static asynStatus writeIt(void *ppvt, asynUser *pasynUser,
             /* Next is the Modbus data */
             memcpy(pPvt->buffer, data, numchars);
             /* Compute the CRC */
-            computeCRC(pPvt->buffer, numchars, &CRC_Lo, &CRC_Hi);
+            computeCRC(pPvt->buffer, (int)numchars, &CRC_Lo, &CRC_Hi);
             pPvt->buffer[numchars] = CRC_Lo;
             pPvt->buffer[numchars+1] = CRC_Hi;
             /* Send the frame with the underlying driver */
@@ -288,7 +289,7 @@ static asynStatus writeIt(void *ppvt, asynUser *pasynUser,
         case modbusLinkASCII:
             /* Put slave address and data in buffer to compute LRC */
             memcpy(pPvt->buffer, data, numchars);
-            computeLRC(pPvt->buffer, numchars, &LRC);
+            computeLRC(pPvt->buffer, (int)numchars, &LRC);
             /* Now convert to ASCII */
             /* First byte in the output is : */
             pout = pPvt->buffer;
@@ -343,7 +344,15 @@ static asynStatus readIt(void *ppvt, asynUser *pasynUser,
                 status = pPvt->pasynOctet->read(pPvt->octetPvt, pasynUser,
                                                 pPvt->buffer, nRead, 
                                                 &nbytesActual, eomReason);
-                if (status != asynSuccess) return status;
+                /* If the returned status is asynTimeout this can be because the interposeEOS
+                 * interface is being used and we received fewer bytes than expected due to a Modbus exception. 
+                 * In this case nbytesActual will be 9 and buffer[7] will have the MODBUS_EXCEPTION_FCN bit set 
+                 * We want to return the data read in this case so the exception can be reported. */
+                if ((nbytesActual == 9) && (pPvt->buffer[7] & MODBUS_EXCEPTION_FCN)) status = asynSuccess;
+                if (status != asynSuccess) {
+                    *nbytesTransfered = nbytesActual;
+                    return status;
+                }
                 if (nbytesActual >= 2) {
                     int id = ((pPvt->buffer[0] & 0xFF)<<8)|(pPvt->buffer[1]&0xFF);
                     if (pPvt->skipTransactionId != 0 || id == pPvt->transactionId) break;
@@ -364,10 +373,13 @@ static asynStatus readIt(void *ppvt, asynUser *pasynUser,
             status = pPvt->pasynOctet->read(pPvt->octetPvt, pasynUser,
                                             pPvt->buffer, nRead,
                                             &nbytesActual, eomReason);
-            if (status != asynSuccess) return status;
+            if (status != asynSuccess) {
+                *nbytesTransfered = nbytesActual;
+                return status;
+            }
             /* Compute and check the CRC including the CRC bytes themselves, 
              * should be 0 */
-            computeCRC(pPvt->buffer, nbytesActual, &CRC_Lo, &CRC_Hi);
+            computeCRC(pPvt->buffer, (int)nbytesActual, &CRC_Lo, &CRC_Hi);
             if ((CRC_Lo != 0) || (CRC_Hi != 0)) {
                 asynPrint(pasynUser, ASYN_TRACE_ERROR,
                           "%s::readIt, CRC error\n",
@@ -391,7 +403,10 @@ static asynStatus readIt(void *ppvt, asynUser *pasynUser,
             status = pPvt->pasynOctet->read(pPvt->octetPvt, pasynUser,
                                             pPvt->buffer, nRead,
                                             &nbytesActual, eomReason);
-            if (status != asynSuccess) return status;
+            if (status != asynSuccess) {
+                *nbytesTransfered = nbytesActual;
+                return status;
+            }
             pin = pPvt->buffer;
             if (*pin != ':') return asynError;
             pin += 1;
@@ -401,7 +416,7 @@ static asynStatus readIt(void *ppvt, asynUser *pasynUser,
             }
             /* Number of bytes in buffer for computing LRC is i */
             nRead = i;
-            computeLRC(data, nRead, &LRC);
+            computeLRC(data, (int)nRead, &LRC);
             if (LRC != data[i]) {
                 asynPrint(pasynUser, ASYN_TRACE_ERROR,
                           "%s::readIt, LRC error, nRead=%d, received LRC=0x%x, computed LRC=0x%x\n",
